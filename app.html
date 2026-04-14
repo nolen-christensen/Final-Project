@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Golf Scorecard App</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark: #0d2b1a;
+      --green-mid:  #1a4728;
+      --green-light:#2a6b3e;
+      --gold:       #c8a84b;
+      --gold-light: #e0c870;
+      --cream:      #f5f0e0;
+      --text-muted: #9fa88c;
+      --red:        #c0392b;
+      --blue:       #2980b9;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--green-dark);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: #0a1f12;
+      border-bottom: 3px solid var(--gold);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+    }
+    .logo span { color: var(--cream); font-weight: 300; }
+    .back-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--gold); }
+
+    /* ===== TABS ===== */
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 18px 16px 0;
+    }
+    .tab {
+      background: var(--green-mid);
+      border: 1px solid #2a4a32;
+      color: var(--text-muted);
+      padding: 10px 22px;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      border-bottom: none;
+    }
+    .tab.active { background: var(--green-mid); color: var(--gold); border-color: var(--gold); border-bottom: 2px solid var(--green-mid); }
+    .tab:hover:not(.active) { color: var(--cream); }
+
+    /* ===== MAIN CARD ===== */
+    .card {
+      background: var(--green-mid);
+      border: 1px solid #2a4a32;
+      border-top: 2px solid var(--gold);
+      border-radius: 0 0 12px 12px;
+      max-width: 960px;
+      margin: 0 auto 30px;
+      padding: 28px 24px;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* ===== COURSE SETUP ===== */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      background: #0d2b1a;
+      border: 1px solid #3a5a3e;
+      color: var(--cream);
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 0.95rem;
+    }
+    .input-group input:focus, .input-group select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    /* ===== SCORECARD TABLE ===== */
+    .scorecard-wrap { overflow-x: auto; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th {
+      background: #0a1f12;
+      color: var(--gold);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 6px;
+      text-align: center;
+      border: 1px solid #1e3d27;
+    }
+    td {
+      padding: 6px 4px;
+      text-align: center;
+      border: 1px solid #1e3d27;
+      font-size: 0.95rem;
+    }
+    td.hole-num { color: var(--gold); font-weight: 600; background: #0a1f12; }
+    td.par-cell { color: var(--text-muted); background: #0e2618; }
+    td.score-cell input {
+      width: 44px;
+      background: #0d2b1a;
+      border: 1px solid #3a5a3e;
+      color: var(--cream);
+      text-align: center;
+      border-radius: 4px;
+      padding: 4px 0;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    td.score-cell input:focus { outline: none; border-color: var(--gold); }
+    td.diff-cell { font-weight: 600; }
+    td.diff-cell.eagle  { color: #f1c40f; }
+    td.diff-cell.birdie { color: #2ecc71; }
+    td.diff-cell.par    { color: var(--text-muted); }
+    td.diff-cell.bogey  { color: #e67e22; }
+    td.diff-cell.double { color: var(--red); }
+    td.diff-cell.worse  { color: #8e1010; }
+
+    tr.total-row td { background: #0a1f12; font-weight: 700; color: var(--gold); }
+    tr.halfway-row td { background: #122b1a; font-style: italic; color: #c8c0a0; }
+
+    /* ===== SUMMARY PANEL ===== */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: #0d2b1a;
+      border: 1px solid #2a4a32;
+      border-radius: 8px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .stat-box .stat-val {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1.1;
+    }
+    .stat-box .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-box.green .stat-val  { color: #2ecc71; }
+    .stat-box.red   .stat-val  { color: var(--red); }
+
+    /* ===== VERDICT BANNER ===== */
+    #verdict {
+      background: linear-gradient(135deg, #0d3a1f, #0a2b16);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 18px 22px;
+      text-align: center;
+      margin-bottom: 20px;
+      display: none;
+    }
+    #verdict .verdict-emoji { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+    #verdict .verdict-text  { font-size: 1.15rem; color: var(--cream); font-weight: 600; }
+    #verdict .verdict-sub   { font-size: 0.9rem;  color: var(--text-muted); margin-top: 4px; }
+
+    /* ===== HANDICAP TAB ===== */
+    .handicap-explainer { background: #0d2b1a; border-radius: 8px; padding: 20px 22px; margin-bottom: 20px; }
+    .handicap-explainer p { color: #c0b89a; font-size: 0.95rem; margin-bottom: 10px; line-height: 1.6; }
+    .hc-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .hc-result {
+      background: #0a1f12;
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 12px;
+    }
+    .hc-result .big-num { font-size: 3rem; font-weight: 700; color: var(--gold); }
+    .hc-result p { color: var(--text-muted); font-size: 0.88rem; margin-top: 6px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .btn-gold { background: var(--gold); color: #0d2b1a; }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; border: 1px solid #3a5a3e; color: var(--text-muted); margin-left: 8px; }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-red { background: #7a1f1f; color: #ffdada; }
+    .btn-red:hover { background: var(--red); }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+
+    /* ===== LEGEND ===== */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #1e3d27;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* ===== HISTORY TAB ===== */
+    .history-empty { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.95rem; }
+    .history-item {
+      background: #0d2b1a;
+      border: 1px solid #2a4a32;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .history-item .hi-course { font-weight: 600; color: var(--cream); }
+    .history-item .hi-date   { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .history-item .hi-score  { font-size: 1.4rem; font-weight: 700; color: var(--gold); }
+    .history-item .hi-diff   { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ===== MEDIA QUERY ===== */
+    @media (max-width: 600px) {
+      .tab { padding: 8px 12px; font-size: 0.82rem; }
+      .card { padding: 18px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⛳ Golf<span>Scorecard</span></div>
+  <a class="back-link" href="golf.html">← Back to Golf Page</a>
+</header>
+
+<div style="max-width:960px; margin:0 auto; padding:16px 16px 0;">
+  <div class="tab-bar">
+    <div class="tab active" onclick="switchTab('scorecard')">Scorecard</div>
+    <div class="tab" onclick="switchTab('handicap')">Handicap</div>
+    <div class="tab" onclick="switchTab('history')">Round History</div>
+  </div>
+</div>
+
+<!-- ======== SCORECARD TAB ======== -->
+<div id="tab-scorecard" class="card" style="max-width:960px;margin:0 auto 30px;border-radius:0 0 12px 12px;">
+
+  <!-- Course Setup -->
+  <div class="section-title">Course Setup</div>
+  <div class="setup-grid">
+    <div class="input-group">
+      <label>Your Name</label>
+      <input type="text" id="player-name" placeholder="Alex Morgan" value="Alex Morgan"/>
+    </div>
+    <div class="input-group">
+      <label>Course Name</label>
+      <input type="text" id="course-name" placeholder="Pebble Beach GC" value="Pebble Beach GC"/>
+    </div>
+    <div class="input-group">
+      <label>Holes</label>
+      <select id="hole-count" onchange="buildScorecard()">
+        <option value="18" selected>18 Holes</option>
+        <option value="9">9 Holes</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Tee Color</label>
+      <select id="tee-color">
+        <option>Black (Pro)</option>
+        <option>Blue (Championship)</option>
+        <option selected>White (Men's)</option>
+        <option>Gold (Senior)</option>
+        <option>Red (Ladies)</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Course Rating</label>
+      <input type="number" id="course-rating" value="72.3" step="0.1"/>
+    </div>
+    <div class="input-group">
+      <label>Slope Rating</label>
+      <input type="number" id="slope-rating" value="130"/>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div id="verdict"></div>
+  <div class="section-title">Live Score</div>
+  <div class="summary-grid" id="summary-grid"></div>
+
+  <!-- Scorecard table -->
+  <div class="section-title">Hole-by-Hole</div>
+  <div class="scorecard-wrap">
+    <table id="scorecard-table"></table>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#f1c40f"></span> Eagle (−2)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#2ecc71"></span> Birdie (−1)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#9fa88c"></span> Par (E)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e67e22"></span> Bogey (+1)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#c0392b"></span> Double (+2)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#8e1010"></span> +3 or worse</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-gold" onclick="saveRound()">💾 Save Round</button>
+    <button class="btn btn-ghost" onclick="buildScorecard()">↺ Reset Scores</button>
+    <button class="btn btn-ghost" onclick="randomizePars()">🎲 Random Pars</button>
+  </div>
+</div>
+
+<!-- ======== HANDICAP TAB ======== -->
+<div id="tab-handicap" class="card" style="max-width:960px;margin:0 auto 30px;border-radius:0 0 12px 12px;display:none;">
+  <div class="section-title">Handicap Calculator</div>
+  <div class="handicap-explainer">
+    <p>Your <strong style="color:var(--gold)">Handicap Index</strong> is a measure of your potential ability. It allows golfers of different skill levels to compete fairly by adjusting their gross score.</p>
+    <p>The World Handicap System (WHS) formula: <em style="color:var(--gold-light)">Handicap Differential = (Adjusted Gross Score − Course Rating) × 113 / Slope Rating</em></p>
+    <p>Your index is the average of the best 8 differentials from your last 20 rounds, multiplied by 0.96.</p>
+  </div>
+  <div class="section-title">Quick Single-Round Estimate</div>
+  <div class="hc-form">
+    <div class="input-group">
+      <label>Your Gross Score</label>
+      <input type="number" id="hc-score" value="90" min="54" max="145"/>
+    </div>
+    <div class="input-group">
+      <label>Course Rating</label>
+      <input type="number" id="hc-cr" value="72.3" step="0.1"/>
+    </div>
+    <div class="input-group">
+      <label>Slope Rating</label>
+      <input type="number" id="hc-slope" value="130" min="55" max="155"/>
+    </div>
+  </div>
+  <button class="btn btn-gold" onclick="calcHandicap()">Calculate Differential</button>
+  <div class="hc-result" id="hc-result" style="display:none;">
+    <div class="big-num" id="hc-num">—</div>
+    <p id="hc-desc">Handicap Differential</p>
+  </div>
+
+  <div class="section-title" style="margin-top:28px;">Skill Level Guide</div>
+  <div class="summary-grid">
+    <div class="stat-box"><div class="stat-val" style="color:#f1c40f">+3–0</div><div class="stat-label">Scratch / Elite</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#2ecc71">1–9</div><div class="stat-label">Low Handicap</div></div>
+    <div class="stat-box"><div class="stat-val">10–18</div><div class="stat-label">Mid Handicap</div></div>
+    <div class="stat-box red"><div class="stat-val">19–28</div><div class="stat-label">High Handicap</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--text-muted)">29–54</div><div class="stat-label">Beginner</div></div>
+  </div>
+</div>
+
+<!-- ======== HISTORY TAB ======== -->
+<div id="tab-history" class="card" style="max-width:960px;margin:0 auto 30px;border-radius:0 0 12px 12px;display:none;">
+  <div class="section-title">Round History</div>
+  <div id="history-list"></div>
+  <div style="margin-top:16px;">
+    <button class="btn btn-red" onclick="clearHistory()">🗑 Clear All History</button>
+  </div>
+</div>
+
+<script>
+  // ===== DATA =====
+  const DEFAULT_PARS_18 = [4,5,3,4,4,3,4,5,4,4,5,3,4,4,3,4,5,4];
+  const DEFAULT_PARS_9  = [4,5,3,4,4,3,4,5,4];
+  let pars = [...DEFAULT_PARS_18];
+  let scores = new Array(18).fill('');
+
+  // ===== TABS =====
+  function switchTab(name) {
+    ['scorecard','handicap','history'].forEach(t => {
+      document.getElementById('tab-'+t).style.display = t === name ? '' : 'none';
+      document.querySelectorAll('.tab')[['scorecard','handicap','history'].indexOf(t)].classList.toggle('active', t===name);
+    });
+    if (name === 'history') renderHistory();
+  }
+
+  // ===== BUILD SCORECARD =====
+  function buildScorecard() {
+    const n = parseInt(document.getElementById('hole-count').value);
+    pars = n === 18 ? [...DEFAULT_PARS_18] : [...DEFAULT_PARS_9];
+    scores = new Array(n).fill('');
+    renderTable();
+    renderSummary();
+  }
+
+  function randomizePars() {
+    const n = parseInt(document.getElementById('hole-count').value);
+    const options = [3,4,5];
+    pars = Array.from({length: n}, () => options[Math.floor(Math.random()*3)]);
+    scores = new Array(n).fill('');
+    renderTable();
+    renderSummary();
+  }
+
+  function renderTable() {
+    const n = pars.length;
+    const frontN = n === 18 ? 9 : n;
+    const backN  = n === 18 ? 9 : 0;
+
+    let html = `<tr>
+      <th>Hole</th>`;
+    for (let i = 1; i <= frontN; i++) html += `<th>${i}</th>`;
+    if (n === 18) { html += `<th>OUT</th>`; for (let i = 10; i <= 18; i++) html += `<th>${i}</th>`; html += `<th>IN</th><th>TOT</th>`; }
+    else { html += `<th>TOT</th>`; }
+    html += `</tr>`;
+
+    // Par row
+    html += `<tr><td class="hole-num">Par</td>`;
+    let frontPar = 0, backPar = 0;
+    for (let i = 0; i < frontN; i++) { frontPar += pars[i]; html += `<td class="par-cell"><input type="number" min="3" max="5" value="${pars[i]}" oninput="changePar(${i},this.value)"/></td>`; }
+    if (n === 18) {
+      html += `<td class="par-cell" style="font-weight:700">${frontPar}</td>`;
+      for (let i = 9; i < 18; i++) { backPar += pars[i]; html += `<td class="par-cell"><input type="number" min="3" max="5" value="${pars[i]}" oninput="changePar(${i},this.value)"/></td>`; }
+      html += `<td class="par-cell" style="font-weight:700">${backPar}</td><td class="par-cell" style="font-weight:700">${frontPar+backPar}</td>`;
+    } else {
+      html += `<td class="par-cell" style="font-weight:700">${frontPar}</td>`;
+    }
+    html += `</tr>`;
+
+    // Score row
+    html += `<tr><td class="hole-num">Score</td>`;
+    let frontScore = 0, backScore = 0, frontFilled = true, backFilled = true;
+    for (let i = 0; i < frontN; i++) {
+      const s = scores[i];
+      html += `<td class="score-cell"><input type="number" min="1" max="15" placeholder="—" value="${s !== '' ? s : ''}" oninput="changeScore(${i},this.value)"/></td>`;
+      if (s !== '' && !isNaN(s)) frontScore += parseInt(s); else frontFilled = false;
+    }
+    if (n === 18) {
+      html += `<td class="total-row">${frontFilled ? frontScore : '—'}</td>`;
+      for (let i = 9; i < 18; i++) {
+        const s = scores[i];
+        html += `<td class="score-cell"><input type="number" min="1" max="15" placeholder="—" value="${s !== '' ? s : ''}" oninput="changeScore(${i},this.value)"/></td>`;
+        if (s !== '' && !isNaN(s)) backScore += parseInt(s); else backFilled = false;
+      }
+      const totalFilled = frontFilled && backFilled;
+      html += `<td class="total-row">${backFilled ? backScore : '—'}</td><td class="total-row">${totalFilled ? (frontScore+backScore) : '—'}</td>`;
+    } else {
+      html += `<td class="total-row">${frontFilled ? frontScore : '—'}</td>`;
+    }
+    html += `</tr>`;
+
+    // Diff row
+    html += `<tr><td class="hole-num">±</td>`;
+    let frontDiff = 0, backDiff = 0, fdf = true, bdf = true;
+    for (let i = 0; i < frontN; i++) {
+      const s = scores[i]; const p = pars[i];
+      if (s !== '' && !isNaN(s)) {
+        const d = parseInt(s) - p; frontDiff += d;
+        html += `<td class="diff-cell ${diffClass(d)}">${fmtDiff(d)}</td>`;
+      } else { fdf = false; html += `<td class="diff-cell par">—</td>`; }
+    }
+    if (n === 18) {
+      html += `<td class="total-row">${fdf ? fmtDiff(frontDiff) : '—'}</td>`;
+      for (let i = 9; i < 18; i++) {
+        const s = scores[i]; const p = pars[i];
+        if (s !== '' && !isNaN(s)) {
+          const d = parseInt(s) - p; backDiff += d;
+          html += `<td class="diff-cell ${diffClass(d)}">${fmtDiff(d)}</td>`;
+        } else { bdf = false; html += `<td class="diff-cell par">—</td>`; }
+      }
+      const tf = fdf && bdf;
+      html += `<td class="total-row">${bdf ? fmtDiff(backDiff) : '—'}</td><td class="total-row">${tf ? fmtDiff(frontDiff+backDiff) : '—'}</td>`;
+    } else {
+      html += `<td class="total-row">${fdf ? fmtDiff(frontDiff) : '—'}</td>`;
+    }
+    html += `</tr>`;
+
+    document.getElementById('scorecard-table').innerHTML = html;
+  }
+
+  function diffClass(d) {
+    if (d <= -2) return 'eagle';
+    if (d === -1) return 'birdie';
+    if (d === 0)  return 'par';
+    if (d === 1)  return 'bogey';
+    if (d === 2)  return 'double';
+    return 'worse';
+  }
+  function fmtDiff(d) {
+    if (d === 0) return 'E';
+    return d > 0 ? '+'+d : ''+d;
+  }
+
+  function changePar(i, v) {
+    const val = parseInt(v);
+    if (val >= 3 && val <= 5) { pars[i] = val; renderSummary(); }
+  }
+  function changeScore(i, v) {
+    scores[i] = v === '' ? '' : parseInt(v);
+    renderSummary();
+    renderTable();
+  }
+
+  // ===== SUMMARY =====
+  function renderSummary() {
+    const n = pars.length;
+    let totalPar = 0, totalScore = 0, filledCount = 0;
+    let eagles=0, birdies=0, parCount=0, bogeys=0, doubles=0, worse=0;
+
+    for (let i = 0; i < n; i++) {
+      totalPar += pars[i];
+      if (scores[i] !== '' && !isNaN(scores[i])) {
+        const s = parseInt(scores[i]);
+        totalScore += s; filledCount++;
+        const d = s - pars[i];
+        if (d <= -2) eagles++;
+        else if (d === -1) birdies++;
+        else if (d === 0) parCount++;
+        else if (d === 1) bogeys++;
+        else if (d === 2) doubles++;
+        else worse++;
+      }
+    }
+
+    const diff = filledCount > 0 ? totalScore - totalPar : null;
+    const holesLeft = n - filledCount;
+
+    const sg = document.getElementById('summary-grid');
+    sg.innerHTML = `
+      <div class="stat-box"><div class="stat-val">${filledCount > 0 ? totalScore : '—'}</div><div class="stat-label">Gross Score</div></div>
+      <div class="stat-box ${diff === null ? '' : diff <= 0 ? 'green' : 'red'}"><div class="stat-val">${diff === null ? '—' : fmtDiff(diff)}</div><div class="stat-label">vs. Par (${totalPar})</div></div>
+      <div class="stat-box"><div class="stat-val">${filledCount}/${n}</div><div class="stat-label">Holes Played</div></div>
+      <div class="stat-box" style="border-color:#f1c40f33"><div class="stat-val" style="color:#f1c40f">${eagles}</div><div class="stat-label">Eagles</div></div>
+      <div class="stat-box" style="border-color:#2ecc7133"><div class="stat-val" style="color:#2ecc71">${birdies}</div><div class="stat-label">Birdies</div></div>
+      <div class="stat-box"><div class="stat-val" style="color:var(--text-muted)">${parCount}</div><div class="stat-label">Pars</div></div>
+      <div class="stat-box" style="border-color:#e67e2233"><div class="stat-val" style="color:#e67e22">${bogeys}</div><div class="stat-label">Bogeys</div></div>
+      <div class="stat-box red"><div class="stat-val">${doubles+worse}</div><div class="stat-label">Dbl+ Bogeys</div></div>
+    `;
+
+    // Verdict banner
+    const vd = document.getElementById('verdict');
+    if (filledCount === n && n > 0) {
+      let emoji, text, sub;
+      if (diff <= -5)      { emoji='🏆'; text=`Incredible round! ${fmtDiff(diff)} — Tour-level performance!`; sub='You might want to reconsider your amateur status.'; }
+      else if (diff <= -2) { emoji='🦅'; text=`Brilliant round! ${fmtDiff(diff)} — Multiple birds today!`; sub='You\'re playing some seriously good golf.'; }
+      else if (diff <= 0)  { emoji='⭐'; text=`Solid round! ${fmtDiff(diff)} — At or under par!`; sub='That\'s genuinely excellent golf. Well played.'; }
+      else if (diff <= 5)  { emoji='🎯'; text=`Good round! ${fmtDiff(diff)} — Respectable score.`; sub='A little more work on the short game and you\'ll be under par.'; }
+      else if (diff <= 15) { emoji='🏌️'; text=`Decent round! ${fmtDiff(diff)} — Room to grow.`; sub='Keep practicing — the course will start cooperating soon.'; }
+      else                  { emoji='⛳'; text=`Round complete! ${fmtDiff(diff)} — Keep at it!`; sub='Every round is a chance to learn. See you on the range.'; }
+      vd.style.display = 'block';
+      vd.innerHTML = `<span class="verdict-emoji">${emoji}</span><div class="verdict-text">${text}</div><div class="verdict-sub">${sub}</div>`;
+    } else {
+      vd.style.display = 'none';
+    }
+  }
+
+  // ===== SAVE ROUND =====
+  function saveRound() {
+    const n = pars.length;
+    let totalScore = 0, totalPar = 0, filledCount = 0;
+    for (let i = 0; i < n; i++) {
+      totalPar += pars[i];
+      if (scores[i] !== '' && !isNaN(scores[i])) { totalScore += parseInt(scores[i]); filledCount++; }
+    }
+    if (filledCount < n) {
+      alert(`Please complete all ${n} holes before saving. You still have ${n - filledCount} holes left.`);
+      return;
+    }
+    const round = {
+      player: document.getElementById('player-name').value || 'Player',
+      course: document.getElementById('course-name').value || 'Unknown Course',
+      tee: document.getElementById('tee-color').value,
+      score: totalScore,
+      par: totalPar,
+      diff: totalScore - totalPar,
+      holes: n,
+      date: new Date().toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}),
+      pars: [...pars],
+      scores: [...scores]
+    };
+    const history = JSON.parse(localStorage.getItem('golf_history') || '[]');
+    history.unshift(round);
+    localStorage.setItem('golf_history', JSON.stringify(history.slice(0,50)));
+    alert(`✅ Round saved! ${round.course} · ${fmtDiff(round.diff)} (${round.score})`);
+  }
+
+  // ===== HANDICAP =====
+  function calcHandicap() {
+    const s = parseFloat(document.getElementById('hc-score').value);
+    const cr = parseFloat(document.getElementById('hc-cr').value);
+    const sl = parseFloat(document.getElementById('hc-slope').value);
+    if (isNaN(s)||isNaN(cr)||isNaN(sl)||sl<55||sl>155) { alert('Please enter valid values.'); return; }
+    const diff = ((s - cr) * 113 / sl).toFixed(1);
+    const el = document.getElementById('hc-result');
+    const label = parseFloat(diff) <= 0 ? 'Excellent! Below scratch differential.' : parseFloat(diff) <= 9 ? 'Low handicap differential — skilled player.' : parseFloat(diff) <= 18 ? 'Mid handicap differential — solid golfer.' : 'High handicap — keep practicing!';
+    document.getElementById('hc-num').textContent = diff;
+    document.getElementById('hc-desc').textContent = `Handicap Differential · ${label}`;
+    el.style.display = 'block';
+  }
+
+  // ===== HISTORY =====
+  function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('golf_history') || '[]');
+    const el = document.getElementById('history-list');
+    if (history.length === 0) {
+      el.innerHTML = '<div class="history-empty">No rounds saved yet. Complete a round and hit "Save Round".</div>';
+      return;
+    }
+    el.innerHTML = history.map(r => `
+      <div class="history-item">
+        <div>
+          <div class="hi-course">${r.course} · ${r.holes} holes · ${r.tee}</div>
+          <div class="hi-date">${r.player} · ${r.date}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hi-score">${r.score}</div>
+          <div class="hi-diff" style="color:${r.diff<=0?'#2ecc71':'#e67e22'}">${fmtDiff(r.diff)} vs par ${r.par}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function clearHistory() {
+    if (confirm('Clear all saved rounds? This cannot be undone.')) {
+      localStorage.removeItem('golf_history');
+      renderHistory();
+    }
+  }
+
+  // ===== INIT =====
+  buildScorecard();
+</script>
+</body>
+</html>

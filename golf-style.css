@@ -1,0 +1,299 @@
+/* =============================================
+   golf-style.css — From-scratch stylesheet
+   ============================================= */
+
+/* ---- 1. Global reset & base ---- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Georgia', serif;
+  background-color: #1a3a2a;
+  color: #f0ece0;
+  line-height: 1.7;
+}
+
+/* ---- 2. Top navigation bar ---- */
+#top-nav {
+  background-color: #0f2218;
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid #c8a84b;
+}
+
+#top-nav .site-name {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #c8a84b;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#top-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 24px;
+}
+
+#top-nav ul li a {
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #d4cbb0;
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+#top-nav ul li a:hover {
+  color: #c8a84b;
+}
+
+/* ---- 3. Hero / header div ---- */
+#hero-div {
+  background-image: url('https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=1400&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 100px 40px 80px;
+  text-align: center;
+  position: relative;
+}
+
+#hero-div::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 30, 15, 0.65);
+}
+
+#hero-div h1 {
+  position: relative;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 3.2rem;
+  color: #c8a84b;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+#hero-div p {
+  position: relative;
+  font-size: 1.2rem;
+  color: #e8e0cc;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---- 4. Main content div ---- */
+#main-content {
+  max-width: 960px;
+  margin: 50px auto;
+  padding: 0 30px;
+}
+
+/* Section headings */
+.section-heading {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 1.7rem;
+  color: #c8a84b;
+  border-bottom: 2px solid #c8a84b44;
+  padding-bottom: 8px;
+  margin-bottom: 22px;
+  letter-spacing: 1px;
+}
+
+/* ---- 5. Content blocks ---- */
+.content-block {
+  background-color: #22472f;
+  border-radius: 8px;
+  padding: 28px 32px;
+  margin-bottom: 36px;
+  border-left: 4px solid #c8a84b;
+}
+
+.content-block p {
+  color: #d8d0b8;
+  font-size: 1.05rem;
+}
+
+/* ---- 6. Lists styling ---- */
+ol.outer-list {
+  color: #c8a84b;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 1.05rem;
+  padding-left: 22px;
+}
+
+ol.outer-list > li {
+  margin-bottom: 14px;
+  color: #e8dfc0;
+}
+
+ol.outer-list > li > strong {
+  color: #c8a84b;
+}
+
+ul.inner-list {
+  list-style-type: disc;
+  padding-left: 22px;
+  margin-top: 8px;
+  color: #bdb49a;
+  font-family: 'Georgia', serif;
+  font-size: 0.97rem;
+}
+
+ul.inner-list li {
+  margin-bottom: 5px;
+}
+
+/* ---- 7. Image styling ---- */
+.golf-image {
+  width: 100%;
+  max-width: 700px;
+  display: block;
+  margin: 20px auto;
+  border-radius: 8px;
+  border: 3px solid #c8a84b;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+}
+
+.image-caption {
+  text-align: center;
+  font-size: 0.88rem;
+  color: #9fa88c;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ---- 8. Video embed div ---- */
+#video-div {
+  background-color: #0f2218;
+  padding: 40px 30px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+#video-div h2 {
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #c8a84b;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 8px;
+  border: 2px solid #c8a84b55;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+  border-radius: 8px;
+}
+
+/* ---- 9. Tableau embed ---- */
+#tableau-div {
+  background-color: #22472f;
+  padding: 40px 30px;
+  margin-bottom: 40px;
+  border-radius: 8px;
+}
+
+#tableau-div h2 {
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #c8a84b;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+/* ---- 10. Anchor link styling ---- */
+.anchor-link {
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #c8a84b;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+  margin: 8px 0 20px;
+}
+
+.anchor-link:hover {
+  text-decoration: underline;
+  color: #e0c870;
+}
+
+/* ---- 11. App link button ---- */
+.app-button {
+  display: inline-block;
+  background-color: #c8a84b;
+  color: #0f2218;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 12px 28px;
+  border-radius: 6px;
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: background 0.2s, transform 0.15s;
+  margin-top: 10px;
+}
+
+.app-button:hover {
+  background-color: #e0c870;
+  transform: translateY(-2px);
+}
+
+/* ---- 12. Footer ---- */
+#page-footer {
+  background-color: #0f2218;
+  text-align: center;
+  padding: 22px;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 0.85rem;
+  color: #7a8f6e;
+  border-top: 2px solid #c8a84b33;
+  margin-top: 40px;
+}
+
+/* ---- 13. Fun fact cards ---- */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.fact-card {
+  background: #0f2218;
+  border-radius: 8px;
+  padding: 16px 18px;
+  text-align: center;
+  border: 1px solid #c8a84b44;
+}
+
+.fact-card .fact-number {
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #c8a84b;
+}
+
+.fact-card .fact-label {
+  font-size: 0.85rem;
+  color: #9fa88c;
+  margin-top: 4px;
+}
